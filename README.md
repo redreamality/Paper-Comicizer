@@ -1,9 +1,7 @@
-<div align="center">
-  <img width="1200" height="475" alt="Doraemon Paper Comicizer banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<div align="center">  
   <h1>Doraemon Paper Comicizer</h1>
   <p><strong>Turn dense academic PDFs into kid-friendly Doraemon comics powered by Gemini 3 Pro.</strong></p>
-  <p>
-    <a href="https://ai.studio/apps/drive/1f9y_94xtGcsxxY8Jxod81p9PLupsXeY-"><img alt="Try in AI Studio" src="https://img.shields.io/badge/Launch%20in-AI%20Studio-4285F4?logo=googlegemini&logoColor=white"></a>
+  <p>    
     <img alt="React" src="https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white">
     <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white">
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white">
@@ -29,9 +27,9 @@
 ## Overview
 **Paper Comicizer** ingests any academic PDF, asks Gemini 3 Pro to summarize the core ideas, plans a Doraemon-themed lesson, and renders every page of the lesson as a comic strip. The UI focuses on clarity: upload a file, monitor three workflow stages (analyze → plan → generate), and browse the generated comic with thumbnails and page navigation.
 
-## Demo
-- **AI Studio app**: https://ai.studio/apps/drive/1f9y_94xtGcsxxY8Jxod81p9PLupsXeY-
-- Works best with PDFs smaller than 10 MB so the base64 payload stays within Gemini limits.
+## Screenshot
+<img width="897" height="472" alt="chrome_2025-11-28_14-20-29" src="https://github.com/user-attachments/assets/94c72fff-ba18-43b1-8d5a-cf83eec20acd" />
+
 
 ## Features
 - 📄 **PDF ingestion** – drag-and-drop upload converts any PDF to base64 before sending it to Gemini.
@@ -54,7 +52,7 @@
 ### Prerequisites
 - **Node.js 18.18+** (Vite 6 requires modern Node runtimes)
 - npm 9+ (comes with recent Node releases)
-- A **Gemini API key** with billing enabled (https://ai.google.dev/gemini-api/docs/api-key)
+- A **Gemini API key** with billing enabled (https://ai.google.dev/gemini-api/docs/api-key), **Currently free for gemini3 and nano banana 2**
 
 ### Installation
 ```bash
