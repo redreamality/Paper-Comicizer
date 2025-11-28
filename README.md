@@ -6,6 +6,11 @@
     <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white">
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white">
   </p>
+  <p>
+    <a href="./README.md">English</a> |
+    <a href="./README.zh.md">中文</a> |
+    <a href="./README.ja.md">日本語</a>
+  </p>
 </div>
 
 ## Table of contents
