@@ -1,0 +1,5 @@
+{
+  "name": "Doraemon Paper Comicizer",
+  "description": "Transform academic papers into engaging educational comics featuring Doraemon and Nobita using Google Gemini 3 Pro.",
+  "requestFramePermissions": []
+}
