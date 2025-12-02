@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { ProgressBar } from './components/ProgressBar';
 import { ComicViewer } from './components/ComicViewer';
@@ -6,8 +6,7 @@ import { AppStatus, ProcessingState, ComicPage } from './types';
 import { analyzePaper, planStory, generateComicPage } from './services/geminiService';
 
 const App: React.FC = () => {
-  const [hasApiKey, setHasApiKey] = useState<boolean>(false);
-  const [isCheckingKey, setIsCheckingKey] = useState<boolean>(true);
+  const [hasApiKey, setHasApiKey] = useState<boolean>(() => Boolean(process.env.OPENROUTER_API_KEY));
 
   const [processingState, setProcessingState] = useState<ProcessingState>({
     status: AppStatus.IDLE,
@@ -18,32 +17,6 @@ const App: React.FC = () => {
 
   const [comicPages, setComicPages] = useState<ComicPage[]>([]);
   const [analysisSummary, setAnalysisSummary] = useState<string>('');
-
-  useEffect(() => {
-    const checkKey = async () => {
-      try {
-        if ((window as any).aistudio?.hasSelectedApiKey) {
-          const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-          setHasApiKey(hasKey);
-        } else {
-          // Fallback for environments without the aistudio object
-          setHasApiKey(true);
-        }
-      } catch (e) {
-        console.error("Error checking API key status", e);
-      } finally {
-        setIsCheckingKey(false);
-      }
-    };
-    checkKey();
-  }, []);
-
-  const handleApiKeySelect = async () => {
-    if ((window as any).aistudio?.openSelectKey) {
-      await (window as any).aistudio.openSelectKey();
-      setHasApiKey(true);
-    }
-  };
 
   const handleFileSelect = async (fileBase64: string, mimeType: string) => {
     // Reset state
@@ -127,7 +100,7 @@ const App: React.FC = () => {
           ...prev,
           status: AppStatus.IDLE // Reset to idle so they see the login screen
         }));
-        alert("Authentication session expired or invalid. Please select your API Key again.");
+        alert("OpenRouter API Key is missing or invalid. Update OPENROUTER_API_KEY in your environment and reload the app.");
         return;
       }
 
@@ -139,44 +112,30 @@ const App: React.FC = () => {
     }
   };
 
-  if (isCheckingKey) {
-    return (
-      <div className="min-h-screen bg-blue-50 flex items-center justify-center">
-        <div className="text-blue-600 font-bold text-xl animate-pulse">Initializing...</div>
-      </div>
-    );
-  }
-
   if (!hasApiKey) {
     return (
       <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center border-4 border-blue-100">
+        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-lg w-full text-center border-4 border-blue-100">
           <div className="text-5xl mb-6">🔐</div>
           <h1 className="text-2xl font-bold text-slate-900 mb-4 font-comic-font">
-            Authentication Required
+            OpenRouter API Key Required
           </h1>
           <p className="text-slate-600 mb-8">
-            To generate high-quality comics using <strong>Gemini 3 Pro</strong>, please connect your Google Cloud API Key.
+            Set <code>OPENROUTER_API_KEY</code> (plus optional model overrides) inside <code>.env.local</code> and restart the dev server.
+            This key powers the calls to OpenRouter's Gemini models.
           </p>
-          
-          <button 
-            onClick={handleApiKeySelect}
-            className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-500 transition-all transform hover:scale-105 mb-4"
-          >
-            Connect API Key
-          </button>
-          
-          <div className="text-xs text-slate-400 mt-4">
-            <p>Requires a paid GCP project key.</p>
-            <a 
-              href="https://ai.google.dev/gemini-api/docs/billing" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              Learn more about billing
-            </a>
+          <div className="bg-blue-50 rounded-2xl p-4 text-left text-sm text-blue-700 font-mono">
+            OPENROUTER_API_KEY=<span className="break-all">sk-or-...</span><br />
+            OPENROUTER_BASE_URL=https://openrouter.ai/api/v1<br />
+            MODEL_LOGIC=google/gemini-3-pro-preview<br />
+            MODEL_IMAGE=google/gemini-3-pro-image-preview
           </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full mt-6 py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:bg-blue-500 transition-all transform hover:scale-105"
+          >
+            Reload after updating
+          </button>
         </div>
       </div>
     );

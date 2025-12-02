@@ -11,8 +11,12 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.OPENROUTER_API_KEY': JSON.stringify(env.OPENROUTER_API_KEY),
+        'process.env.OPENROUTER_BASE_URL': JSON.stringify(env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'),
+        'process.env.MODEL_LOGIC': JSON.stringify(env.MODEL_LOGIC ?? 'google/gemini-3-pro-preview'),
+        'process.env.MODEL_IMAGE': JSON.stringify(env.MODEL_IMAGE ?? 'google/gemini-3-pro-image-preview'),
+        'process.env.APP_URL': JSON.stringify(env.APP_URL ?? 'http://localhost:3000'),
+        'process.env.APP_TITLE': JSON.stringify(env.APP_TITLE ?? 'Doraemon Paper Comicizer')
       },
       resolve: {
         alias: {
