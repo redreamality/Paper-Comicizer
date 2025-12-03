@@ -1,6 +1,6 @@
 <div align="center">  
   <h1>哆啦A梦论文漫画机</h1>
-  <p><strong>把晦涩的学术 PDF 变成由 Gemini 3 Pro 驱动的儿童友好型哆啦A梦漫画。</strong></p>
+  <p><strong>把晦涩的学术 PDF 变成由 OpenRouter 上的 Gemini 3 Pro 驱动的儿童友好型哆啦A梦漫画。</strong></p>
   <p>    
     <img alt="React" src="https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white">
     <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white">
@@ -36,11 +36,11 @@
 <img width="897" height="472" alt="chrome_2025-11-28_14-20-29" src="https://github.com/user-attachments/assets/94c72fff-ba18-43b1-8d5a-cf83eec20acd" />
 
 ## 功能
-- 📄 **PDF 导入** —— 拖拽上传会在发送给 Gemini 前把任何 PDF 转成 base64。
-- 🤖 **多步推理** —— Gemini 负责分析论文、规划叙事并渲染每个画格。
+- 📄 **PDF 导入** —— 拖拽上传会在发送给 OpenRouter 的 Gemini 模型前把任何 PDF 转成 base64。
+- 🤖 **多步推理** —— 通过 OpenRouter 调用的 Gemini 负责分析论文、规划叙事并渲染每个画格。
 - 🎨 **实时漫画渲染** —— 每生成一页就立刻出现在 Comic Viewer 中，可查看大图与缩略图。
-- 🔐 **AI Studio 密钥管理** —— 提示用户选择 API Key，并优雅处理已过期的会话。
-- ⚙️ **服务层** —— `services/geminiService.ts` 统一提示模板、错误处理以及类型安全的返回值。
+- 🔐 **基于环境变量的密钥管理** —— 若 OpenRouter Key 缺失/失效会展示友好的引导面板。
+- ⚙️ **服务层** —— `services/geminiService.ts` 统一提示模板、OpenRouter 载荷以及类型安全的返回值。
 - 🧠 **类型化工作流状态** —— `AppStatus`、`ProcessingState` 与 `ComicPage` 让 UI 更可预期、更稳健。
 
 ## 技术栈
@@ -48,7 +48,7 @@
 | --- | --- |
 | 前端 | React 19 + TypeScript，Vite 6 |
 | 样式 | 基于 utility classes（类似 Tailwind），搭配活泼字体与渐变 |
-| AI | 通过 `@google/genai` SDK 调用 Gemini 3 Pro（文本 + 图像） |
+| AI | 通过 OpenRouter Responses API 调用 Gemini 3 Pro 文本/图像模型 |
 | 构建 | Vite 开发服务器，可直接导出静态资源 |
 
 ## 快速开始
@@ -56,7 +56,7 @@
 ### 先决条件
 - **Node.js 18.18+**（Vite 6 需要现代 Node 运行时）
 - npm 9+（随新版 Node 一起提供）
-- 启用了计费的 **Gemini API Key**（https://ai.google.dev/gemini-api/docs/api-key），**目前 gemini3 与 nano banana 2 仍可免费使用**
+- 可访问 `google/gemini-3-pro-preview` 与 `google/gemini-3-pro-image-preview` 的 **OpenRouter API Key**（https://openrouter.ai/）
 
 ### 安装
 ```bash
@@ -66,11 +66,15 @@ npm install
 ```
 
 ### 环境变量
-在项目根目录创建 `.env.local` 并写入 Gemini API Key：
+在项目根目录创建 `.env.local` 并写入 OpenRouter 配置（只需 API Key 必填）：
 ```bash
-GEMINI_API_KEY="your-key-here"
+OPENROUTER_API_KEY="sk-or-..."
+OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
+MODEL_LOGIC="google/gemini-3-pro-preview"
+MODEL_IMAGE="google/gemini-3-pro-image-preview"
+APP_URL="http://localhost:3000"        # 供 HTTP-Referer 头使用
+APP_TITLE="Doraemon Paper Comicizer"   # 会显示在 OpenRouter 仪表盘
 ```
-如果你在 AI Studio 托管体验中启动项目，密钥会自动注入；本地开发则需要此文件。
 
 ### 本地运行
 ```bash
@@ -89,11 +93,11 @@ npm run preview      # 可选：本地预览 dist 目录
 .
 ├── App.tsx                 # 应用工作流协调器（上传 → 进度 → 查看）
 ├── components/
-│   ├── FileUpload.tsx      # 拖拽区域与 API Key CTA
+│   ├── FileUpload.tsx      # 拖拽区域与 PDF 校验提示
 │   ├── ProgressBar.tsx     # 感知阶段的进度条与错误提示
 │   └── ComicViewer.tsx     # 缩略图导航与页面查看
 ├── services/
-│   └── geminiService.ts    # 调用 Gemini 3 Pro 的分析、规划与渲染辅助函数
+│   └── geminiService.ts    # 通过 OpenRouter 调用 Gemini 的分析/规划/渲染辅助
 ├── constants.ts            # 提示词与通用模型配置
 ├── types.ts                # App 状态与漫画页面的强类型定义
 ├── metadata.json           # 供 AI Studio 部署用的元数据
@@ -101,7 +105,7 @@ npm run preview      # 可选：本地预览 dist 目录
 ```
 
 ## 工作原理
-1. **认证** —— 应用检测 AI Studio 是否已有选定密钥；若无则提示用户选择。
+1. **校验密钥** —— 应用确保 `OPENROUTER_API_KEY` 已配置，若身份验证失败会提示更新环境变量。
 2. **分析** —— `analyzePaper` 将 PDF（base64）发送给 Gemini 3 Pro 做摘要。
 3. **规划** —— `planStory` 请求 JSON 计划，把主题拆成适合儿童的场景。
 4. **生成** —— `generateComicPage` 针对每个计划步骤调用图像端点，并把进度流式回传 UI。
@@ -115,9 +119,10 @@ npm run preview      # 可选：本地预览 dist 目录
 | `npm run preview` | 本地预览生产构建 |
 
 ## 故障排除
-- **“需要身份验证”** —— 点击 *Connect API Key* 重新授权 AI Studio。
-- **卡在分析阶段** —— 确认 PDF 未超过 Gemini 负载限制，且 API Key 仍有配额。
-- **生成空白图像** —— 重新生成；若提示预算耗尽，Gemini 偶尔会返回空画面。
+- **出现 “需要 OpenRouter API Key” 面板** —— 在 `.env.local` 中添加 `OPENROUTER_API_KEY`，重启 `npm run dev` 并刷新浏览器。
+- **401 / UNAUTHENTICATED 错误** —— 检查 Key 是否填写正确、`APP_URL`（Referer）是否与你的访问域名一致，以及目标模型是否已开通。
+- **卡在分析阶段** —— 过大的 PDF 可能超过上下文长度，可先裁剪或自行提炼摘要再上传。
+- **生成空白图像** —— 重新运行，或确认 `MODEL_IMAGE` 指向具备图像能力的 Gemini 模型。
 
 ## Star 历史
 [![Star History Chart](https://api.star-history.com/svg?repos=redreamality/Paper-Comicizer&type=Date)](https://star-history.com/#redreamality/Paper-Comicizer&Date)

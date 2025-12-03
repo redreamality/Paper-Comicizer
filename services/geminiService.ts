@@ -12,27 +12,52 @@ import {
 
 type OpenRouterResponse = Record<string, any>;
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+// 动态获取OpenRouter API密钥
+const getOpenRouterApiKey = (): string => {
+  // 1. 尝试从localStorage获取
+  try {
+    const stored = localStorage.getItem('paper_comicizer_api_keys');
+    if (stored) {
+      const keys = JSON.parse(stored);
+      if (keys.openRouterApiKey && keys.isValid?.openRouter) {
+        return keys.openRouterApiKey;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to parse stored API keys:', error);
+  }
+
+  // 2. 回退到环境变量
+  const envKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  if (envKey) {
+    return envKey;
+  }
+
+  // 3. 没有找到密钥
+  return '';
+};
 
 const buildUrl = (path: string) =>
   `${OPENROUTER_BASE_URL.replace(/\/$/, "")}${path}`;
 
 const openRouterHeaders = () => {
-  if (!OPENROUTER_API_KEY) {
-    throw new Error("OpenRouter API Key not found in environment variables");
+  const apiKey = getOpenRouterApiKey();
+  if (!apiKey) {
+    throw new Error("OpenRouter API Key not found. Please configure your API key in the settings.");
   }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+    Authorization: `Bearer ${apiKey}`,
   };
 
   if (APP_REFERER) {
     headers["HTTP-Referer"] = APP_REFERER;
   }
-  if (APP_TITLE) {
-    headers["X-Title"] = APP_TITLE;
-  }
+  // 注释掉 X-Title 头，因为它可能包含非ASCII字符
+  // if (APP_TITLE) {
+  //   headers["X-Title"] = APP_TITLE;
+  // }
 
   return headers;
 };

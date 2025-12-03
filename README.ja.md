@@ -1,6 +1,6 @@
 <div align="center">  
   <h1>ドラえもん・ペーパー・コミカイザー</h1>
-  <p><strong>密度の高い学術 PDF を Gemini 3 Pro の力で子ども向けのドラえもん漫画に変換します。</strong></p>
+  <p><strong>密度の高い学術 PDF を OpenRouter 経由の Gemini 3 Pro で子ども向けのドラえもん漫画に変換します。</strong></p>
   <p>    
     <img alt="React" src="https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white">
     <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white">
@@ -36,11 +36,11 @@
 <img width="897" height="472" alt="chrome_2025-11-28_14-20-29" src="https://github.com/user-attachments/assets/94c72fff-ba18-43b1-8d5a-cf83eec20acd" />
 
 ## 機能
-- 📄 **PDF 取り込み** — ドラッグ＆ドロップした PDF を Gemini に送信する前に base64 へ変換します。
-- 🤖 **段階的推論** — Gemini が論文を分析し、物語を設計し、各パネルをレンダリングします。
+- 📄 **PDF 取り込み** — ドラッグ＆ドロップした PDF を OpenRouter の Gemini モデルへ送信する前に base64 へ変換します。
+- 🤖 **段階的推論** — OpenRouter 経由の Gemini が論文を分析し、物語を設計し、各パネルをレンダリングします。
 - 🎨 **ライブ漫画レンダリング** — 生成されたページは即座に Comic Viewer に表示され、サムネイルとフルサイズプレビューを切り替えられます。
-- 🔐 **AI Studio キー管理** — ユーザーに API キー選択を促し、期限切れセッションも丁寧に処理します。
-- ⚙️ **サービス層** — `services/geminiService.ts` がプロンプト、エラーハンドリング、型付きレスポンスを一元管理します。
+- 🔐 **環境変数ベースのキー管理** — OpenRouter キーが欠落・無効な場合にわかりやすい案内を表示します。
+- ⚙️ **サービス層** — `services/geminiService.ts` がプロンプト、OpenRouter ペイロード、型付きレスポンスを一元管理します。
 - 🧠 **型付きワークフロー状態** — `AppStatus`、`ProcessingState`、`ComicPage` によって UI の予測可能性と堅牢性を担保します。
 
 ## 技術スタック
@@ -48,7 +48,7 @@
 | --- | --- |
 | フロントエンド | React 19 + TypeScript、Vite 6 |
 | スタイリング | ユーティリティクラス（Tailwind 風）と遊び心のあるフォント・グラデーション |
-| AI | `@google/genai` SDK で Gemini 3 Pro（テキスト + 画像）を呼び出し |
+| AI | OpenRouter Responses API（Gemini 3 Pro のテキスト/画像モデル） |
 | ビルド | Vite 開発サーバー。静的エクスポートにも対応 |
 
 ## はじめに
@@ -56,7 +56,7 @@
 ### 前提条件
 - **Node.js 18.18+**（Vite 6 が要求するモダンなランタイム）
 - npm 9+（最新の Node に同梱）
-- 課金が有効な **Gemini API キー**（https://ai.google.dev/gemini-api/docs/api-key）。**現在は gemini3 と nano banana 2 が無料で利用可能です。**
+- `google/gemini-3-pro-preview` と `google/gemini-3-pro-image-preview` へアクセス可能な **OpenRouter API キー**（https://openrouter.ai/）
 
 ### インストール
 ```bash
@@ -66,11 +66,15 @@ npm install
 ```
 
 ### 環境変数
-プロジェクトルートに `.env.local` を作成し、Gemini API キーを追加します。
+プロジェクトルートに `.env.local` を作成し、OpenRouter の設定（API キーは必須）を追加します。
 ```bash
-GEMINI_API_KEY="your-key-here"
+OPENROUTER_API_KEY="sk-or-..."
+OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
+MODEL_LOGIC="google/gemini-3-pro-preview"
+MODEL_IMAGE="google/gemini-3-pro-image-preview"
+APP_URL="http://localhost:3000"        # HTTP-Referer ヘッダーに使用
+APP_TITLE="Doraemon Paper Comicizer"   # OpenRouter ダッシュボードに表示
 ```
-AI Studio のホスト体験から起動した場合は自動で注入されますが、ローカル開発ではこのファイルが必要です。
 
 ### ローカルでの実行
 ```bash
@@ -89,11 +93,11 @@ npm run preview      # 任意：dist フォルダをローカル配信
 .
 ├── App.tsx                 # アプリのワークフロー調整（アップロード → 進捗 → ビューア）
 ├── components/
-│   ├── FileUpload.tsx      # ドラッグ＆ドロップ領域と API キー CTA
+│   ├── FileUpload.tsx      # ドラッグ＆ドロップ領域と PDF バリデーション
 │   ├── ProgressBar.tsx     # 段階に応じた進捗表示とエラー提示
 │   └── ComicViewer.tsx     # サムネイルナビとページビューア
 ├── services/
-│   └── geminiService.ts    # Gemini 3 Pro の分析・計画・レンダリング補助
+│   └── geminiService.ts    # OpenRouter 経由で Gemini を叩く分析・計画・レンダリング補助
 ├── constants.ts            # プロンプト文字列と共有モデル設定
 ├── types.ts                # アプリ状態と漫画ページの型定義
 ├── metadata.json           # AI Studio デプロイ用メタデータ
@@ -101,7 +105,7 @@ npm run preview      # 任意：dist フォルダをローカル配信
 ```
 
 ## 仕組み
-1. **認証** — AI Studio でキーが選択済みか確認し、未設定なら選択を促します。
+1. **キーの検証** — `OPENROUTER_API_KEY` が設定済みかチェックし、認証エラーが起きたら環境変数の更新を案内します。
 2. **分析** — `analyzePaper` が PDF（base64）を Gemini 3 Pro に送り、要約を受け取ります。
 3. **計画** — `planStory` が JSON プランを取得し、子ども向けのシーンへ分解します。
 4. **生成** — 各シーンに対して `generateComicPage` が画像エンドポイントを呼び、進捗を UI へストリーミングします。
@@ -115,9 +119,10 @@ npm run preview      # 任意：dist フォルダをローカル配信
 | `npm run preview` | 本番ビルドをローカルでプレビュー |
 
 ## トラブルシューティング
-- **「Authentication Required」** — *Connect API Key* をクリックして AI Studio を再認可します。
-- **分析で停止する** — PDF が Gemini のペイロード制限内か、API キーに十分なクォータがあるか確認してください。
-- **空白の画像が出る** — 再生成してください。プロンプト予算を使い切ると稀に空のフレームが返ります。
+- **「OpenRouter API Key Required」画面が出る** — `.env.local` に `OPENROUTER_API_KEY` を追加し、`npm run dev` を再起動したうえでブラウザをリロードしてください。
+- **401 / UNAUTHENTICATED エラー** — キー値、`APP_URL`（Referer）、および対象モデルが OpenRouter で有効かを確認します。
+- **分析で停止する** — PDF が長すぎるとトークン上限に達します。重要部分だけを抽出して渡すと安定します。
+- **空白の画像が出る** — もう一度実行するか、`MODEL_IMAGE` が画像モデルを指しているかを確認します。
 
 ## Star ヒストリー
 [![Star History Chart](https://api.star-history.com/svg?repos=redreamality/Paper-Comicizer&type=Date)](https://star-history.com/#redreamality/Paper-Comicizer&Date)

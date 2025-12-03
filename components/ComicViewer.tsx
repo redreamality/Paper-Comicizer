@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ComicPage } from '../types';
+import { exportComicToPDF } from '../utils/pdfExport';
 
 interface ComicViewerProps {
   pages: ComicPage[];
@@ -7,8 +8,22 @@ interface ComicViewerProps {
 
 export const ComicViewer: React.FC<ComicViewerProps> = ({ pages }) => {
   const [selectedPage, setSelectedPage] = useState<number>(0);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
   if (pages.length === 0) return null;
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      await exportComicToPDF(pages, 'Paper_Comicizer');
+      // Success message could be added here
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+      alert('导出 PDF 失败，请重试。');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-8 p-4">
@@ -78,6 +93,50 @@ export const ComicViewer: React.FC<ComicViewerProps> = ({ pages }) => {
             </div>
           </button>
         ))}
+      </div>
+
+      {/* Export PDF Button */}
+      <div className="mt-8 flex justify-center">
+        <button
+          onClick={handleExportPDF}
+          disabled={isExporting}
+          className="
+            px-8 py-4
+            bg-gradient-to-r from-green-500 to-green-600
+            hover:from-green-600 hover:to-green-700
+            text-white
+            rounded-2xl
+            font-bold
+            text-lg
+            shadow-xl
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+            transition-all
+            transform
+            hover:scale-105
+            active:scale-95
+            flex
+            items-center
+            gap-3
+          "
+        >
+          {isExporting ? (
+            <>
+              <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>生成中...</span>
+            </>
+          ) : (
+            <>
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>导出为 PDF</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
