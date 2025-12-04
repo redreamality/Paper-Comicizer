@@ -137,3 +137,6 @@ Email: support@visualize.top
 
 
 Happy comicizing! 🎨📚
+
+---
+This project is sponsored by OpenSQZ
