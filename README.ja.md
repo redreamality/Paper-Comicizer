@@ -28,6 +28,7 @@
 - [仕組み](#仕組み)
 - [利用可能なスクリプト](#利用可能なスクリプト)
 - [トラブルシューティング](#トラブルシューティング)
+- [お問い合わせ](#お問い合わせ)
 - [Star ヒストリー](#star-ヒストリー)
 
 ## ニュース
@@ -122,6 +123,13 @@ npm run preview      # 任意：dist フォルダをローカル配信
 - **「Authentication Required」** — *Connect API Key* をクリックして AI Studio を再認可します。
 - **分析で停止する** — PDF が Gemini のペイロード制限内か、API キーに十分なクォータがあるか確認してください。
 - **空白の画像が出る** — 再生成してください。プロンプト予算を使い切ると稀に空のフレームが返ります。
+
+## お問い合わせ
+
+WeChatグループ
+![b5b01fffde3fcad1d4d0b8bc556f716](https://github.com/user-attachments/assets/f6562daa-f74b-47bf-bb3c-ba02f7a80a63)
+
+メール: support@visualize.top
 
 ## Star ヒストリー
 [![Star History Chart](https://api.star-history.com/svg?repos=redreamality/Paper-Comicizer&type=Date)](https://star-history.com/#redreamality/Paper-Comicizer&Date)
