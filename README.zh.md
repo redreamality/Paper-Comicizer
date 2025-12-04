@@ -28,6 +28,7 @@
 - [工作原理](#工作原理)
 - [可用脚本](#可用脚本)
 - [故障排除](#故障排除)
+- [联系我们](#联系我们)
 - [Star 历史](#star-历史)
 
 ## 新闻
@@ -122,6 +123,13 @@ npm run preview      # 可选：本地预览 dist 目录
 - **“需要身份验证”** —— 点击 *Connect API Key* 重新授权 AI Studio。
 - **卡在分析阶段** —— 确认 PDF 未超过 Gemini 负载限制，且 API Key 仍有配额。
 - **生成空白图像** —— 重新生成；若提示预算耗尽，Gemini 偶尔会返回空画面。
+
+## 联系我们
+
+微信群
+![b5b01fffde3fcad1d4d0b8bc556f716](https://github.com/user-attachments/assets/f6562daa-f74b-47bf-bb3c-ba02f7a80a63)
+
+邮箱: support@visualize.top
 
 ## Star 历史
 [![Star History Chart](https://api.star-history.com/svg?repos=redreamality/Paper-Comicizer&type=Date)](https://star-history.com/#redreamality/Paper-Comicizer&Date)
